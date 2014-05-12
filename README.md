@@ -2,6 +2,9 @@ http://sp0ngee.tistory.com/9
 http://database.sarang.net/study/glibc/10.htm
 
 ### 해야 할 순서
+
+#### 서버의 권한 확대!
+
 1. Shared Memory나 FIFO를 통해서 버퍼를 어떻게 가지고 있을지 설정 ( 파일을 쓸까? )
 2. 가지고 있는 버퍼를 열고 자기 위로 유사한 놈이 있는지 찾기
 3. 없으면 대기하기
