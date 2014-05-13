@@ -54,9 +54,6 @@ int main(int argc, char **argv)
 			fgets(message, BUFSIZE, stdin);
 			timer = time(NULL);		// get a current time
 			t = localtime(&timer);	// struct
-			// cat strings
-			strcat(stamp, timeToString(t));
-			strcat(stamp, message);
 			
 			if(!strcmp(message, "q\n"))
 			{
@@ -64,7 +61,12 @@ int main(int argc, char **argv)
 				close(sock);
 				exit(0);
 			}
+
+			// cat strings
+			strcat(stamp, timeToString(t));
+			strcat(stamp, message);
 			write(sock, stamp, strlen(stamp)); // send [timestamp]: message
+			memset(stamp,NULL,BUFSIZE);
 		}
 	}
 	else

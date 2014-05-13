@@ -93,7 +93,13 @@ int main(int argc, char **argv)
 			{
 				if((str_len = read(clnt_sock, message, BUFSIZE)) == 0)
 					break;
-				write(clnt_sock, message, str_len); // send data
+				/* TODO 
+				 * 버퍼를 쭉 보면서 가능성 계산
+				 * 버퍼가 없거나 가능성이 낮다면 2초 기다렸다가 다시 계산(내 위, 아래 버퍼 검색)
+				 * 가능성 높다면 버퍼로부터 상대방 연락처 전송
+				 *		write(clnt_sock, "A contact", strlen("A contact"));
+				 * 버퍼 삭제
+				 */
 				write(1, message, str_len);
 			}
 			puts("Disconnect");
