@@ -1,3 +1,6 @@
+/* 현재 다수의 클라이언트로 read는 되는데 broadcast가 안되는 상황
+ * broadcast[BUFSIZE]; 있음
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -56,7 +59,9 @@ int main(int argc, char **argv)
 	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	serv_addr.sin_port = htons(atoi(argv[1]));
 
-	if(bind(serv_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
+	if(bind(serv_sock, 
+				(struct sockaddr*)&serv_addr, 
+							sizeof(serv_addr)) == -1)
 	{
 		error_handling((char *)"bind() error");
 	}
@@ -68,7 +73,9 @@ int main(int argc, char **argv)
 	while(1)
 	{
 		addr_size = sizeof(clnt_addr);
-		clnt_sock = accept(serv_sock, (struct sockaddr*)&clnt_addr, &addr_size);
+		clnt_sock = accept(serv_sock, 
+							(struct sockaddr*)&clnt_addr, 
+								&addr_size);
 		if(clnt_sock == -1)
 			continue;
 
@@ -79,28 +86,43 @@ int main(int argc, char **argv)
 			continue;
 		}
 		else if(pid > 0)                // 부모 프로세스인 경우
-		{
-			printf("[%s]: ", inet_ntoa(clnt_addr.sin_addr)); // Client IP Addr 출력
+		{ /*
+			printf("[%s]: ", inet_ntoa(clnt_addr.sin_addr)); 
+			// Client IP Addr 출력
 			puts("Connected");
 			close(clnt_sock);
-			continue;
+			continue;*/
+			close(serv_sock);
+			while(1) {
+				if((str_len = read(clnt_sock,
+								message,
+								BUFSIZE)) < 0) {
+					printf("read() error!\n");
+					exit(-1);
+				}
+				printf("%s\n", message);
+				// same as write(1, message, str_len);
+				if(strncmp(message,"exit",4)==0)
+					break;
+			}
 		}
 		else                            // 자식 프로세스인 경우
 		{
+			/*
 			close(serv_sock);
 
-			/* 자식 프로세스의 처리 영역 : 데이터 수신 및 전송 */
 			while(1)
 			{
-				if((str_len = read(clnt_sock, message, BUFSIZE)) == 0)
+				if((str_len = read(clnt_sock, 
+								message, 
+								BUFSIZE)) == 0)
 					break;
-				/* TODO 
-				 * 버퍼를 쭉 보면서 가능성 계산
-				 * 버퍼가 없거나 가능성이 낮다면 2초 기다렸다가 다시 계산(내 위, 아래 버퍼 검색)
-				 * 가능성 높다면 버퍼로부터 상대방 연락처 전송
-				 *		write(clnt_sock, "A contact", strlen("A contact"));
-				 * 버퍼 삭제
-				 */
+				 // 버퍼를 쭉 보면서 가능성 계산
+				 // 버퍼가 없거나 가능성이 낮다면 2초 기다렸다가 다시 계산(내 위, 아래 버퍼 검색)
+				 // 가능성 높다면 버퍼로부터 상대방 연락처 전송
+				 //		write(clnt_sock, "A contact", strlen("A contact"));
+				 // 버퍼 삭제
+				 
 				write(1, message, str_len);
 				//fgets(broadcast,sizeof(broadcast),stdin);
 				//write(clnt_sock,broadcast, strlen(broadcast));
@@ -108,9 +130,19 @@ int main(int argc, char **argv)
 			puts("Disconnect");
 			close(clnt_sock);
 			exit(0);
+			*/
+			while(1) {
+				fgets(broadcast,sizeof(broadcast),stdin);
+				write(clnt_sock, broadcast, strlen(broadcast));
+				if(strncmp(broadcast,"exit",4)==0) {
+					puts("Goodbye");
+					close(clnt_sock);
+					break;
+				}
+				memset(broadcast,NULL,sizeof(broadcast));
+			}
 		}
 	}
-
 	return 0;
 }
 
