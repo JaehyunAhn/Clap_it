@@ -30,6 +30,8 @@ int main(int argc, char **argv)
 	char message[BUFSIZE];
 	char broadcast[BUFSIZE];
 
+	int *index = (int*) malloc (sizeof(int));
+	*index = 0;
 
 	if(argc != 2) {
 		printf("Usage: %s <port>\n", argv[0]);
@@ -76,6 +78,7 @@ int main(int argc, char **argv)
 		clnt_sock = accept(serv_sock, 
 							(struct sockaddr*)&clnt_addr, 
 								&addr_size);
+		*index += 1;
 		if(clnt_sock == -1)
 			continue;
 
@@ -104,12 +107,15 @@ int main(int argc, char **argv)
 								message, 
 								BUFSIZE)) == 0)
 					break;
+
 				 /* TODO 서버 -> 클라이언트 메시지
 				 */
 				write(1, message, str_len);
-				printf("TABLE LOOKUP \n");
+				printf("TABLE LOOKUP, index: %d \n",*index);
 				fgets(broadcast,sizeof(broadcast),stdin);
 				write(clnt_sock,broadcast, strlen(broadcast));
+				if(strncmp(broadcast,"ans",3)==0)
+					*index -= 1;
 				memset(broadcast,NULL,sizeof(broadcast));
 			}
 			puts("Disconnect");
@@ -117,7 +123,6 @@ int main(int argc, char **argv)
 			exit(0);
 		}
 	}
-
 	return 0;
 }
 

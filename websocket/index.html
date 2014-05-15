@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script type="text/javascript">
+var ws;
+
+function createChatEntry(username, message, time) {
+	var entry = document.createElement("div");
+	entry.class = "chat_entry";
+	
+	var dom_uname = document.createElement("span");
+	dom_uname.class = "chat_username";
+	dom_uname.innerHTML = username + ": ";
+	entry.appendChild(dom_uname);
+	
+	var dom_msg = document.createElement("span");
+	dom_msg.class = "chat_message";
+	dom_msg.innerHTML = message;
+	entry.appendChild(dom_msg);
+
+	var dom_time = document.createElement("span");
+	dom_time.class = "chat_time";
+	dom_time.innerHTML = time;
+	entry.appendChild(dom_time);
+	
+	return entry;
+}
+
+function openWS(messageContainer) {
+	ws = new WebSocket("ws://10.0.174.57/chat");
+	ws.onmessage = function(e) {
+		var data = JSON.parse(e.data);
+		messageContainer.appendChild( // send messge to chat.py
+				createChatEntry(data.author, 
+					data.message, 
+					data.time));
+	};
+	ws.onclose = function(e) {
+		openWS(messageContainer);
+	};
+}
+
+function sendMessage() {
+	var currentdate = new Date();
+	var dates    = currentdate.getDate();
+	var months   = currentdate.getMonth()+1;
+	var hours    = currentdate.getHours();
+	var minute   = currentdate.getMinutes();
+	var seconds  = currentdate.getSeconds();
+	var datetime = "(" + (dates<10?"0":"")  + dates    + "/" 
+						+ (months<10?"0":"") + months   + "/"
+						+  currentdate.getFullYear()    + " @ "
+						+ (hours<10?"0":"")  + hours    + ":"
+						+ (minute<10?"0":"") + minute   + ":"
+						+ (seconds<10?"0":"") + seconds + ")";
+	var data = {
+		// cooking message 
+		author:		document.getElementById("username").value,
+		message:	document.getElementById("message").value,
+		time:		datetime
+	};
+
+	if(data.author && data.message && data.time) {
+		ws.send(JSON.stringify(data));
+	}
+}
+
+window.onload = function() {
+	var messageContainer = document.getElementById("chat");
+	if("WebSocket" in window) {
+		messageContainer.appendChild(createChatEntry("[SYSTEM]", "WebSocket is supported by your browser!",""));
+		messageContainer.appendChild(createChatEntry("[SYSTEM]", "Pick a username and start sending out messages.",""));
+		openWS(messageContainer);
+	}
+	else {
+		messageContainer.appendChild(createChatEntry("[SYSTEM]", "WebSocket is NOT supported by your browser!"));
+	}
+}
+</script>
+</head>
+<body>
+<div id="chat" style="width: 100%; height: 25em; overflow: scroll; font-family: Arial"></div>
+<div id="input_area">
+	<input id="username" type="text" placeholder="Your username" style="display: block; width: 200px"></input>
+	<textarea id="message" placeholder="Your message" style="display: block; width: 400px"></textarea>
+	<button onclick="sendMessage()" style="display: block">Send</button>
+</div>
+</body>
+</html>
