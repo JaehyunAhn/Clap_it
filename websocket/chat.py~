@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # chat.py file
+
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
@@ -9,7 +9,6 @@ import lookup
 
 clients = []
 lookup_table = []
-broadcast_msg = [{'author':'admin','message':'wait','time':'t'}]
 
 class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -26,13 +25,12 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         message = eval(message)             # converge unicode to dictionary
         sender_ip = self.request.remote_ip  # find client's ip
         message['sender_ip'] = sender_ip    # add on dictionary
-        lookup.add_and_search(message, lookup_table, broadcast_msg)     # find friend
         
-        self.write_message(broadcast_msg[0]) # receive result
+        this_user = self
+        lookup.add_and_search(this_user, message, lookup_table)     # find friend
         
         #for client in clients:
             #client.write_message(message) #Broad cast to every clients
-            #  메시지 보낸 사용자에게만 가는 메시지
     
     def on_close(self):
         print("clinet gone")
