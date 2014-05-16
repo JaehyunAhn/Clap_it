@@ -28,7 +28,7 @@ function createChatEntry(username, message, time) {
 }
 
 function openWS(messageContainer) {
-	ws = new WebSocket("ws://10.0.154.57/chat");
+	ws = new WebSocket("ws://10.0.174.57/chat");
 	ws.onmessage = function(e) {
 		var data = JSON.parse(e.data);
 		messageContainer.appendChild( // send messge to chat.py
