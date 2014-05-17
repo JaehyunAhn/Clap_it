@@ -23,8 +23,6 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         message = eval(message)             # converge unicode to dictionary
-        sender_ip = self.request.remote_ip  # find client's ip
-        message['sender_ip'] = sender_ip    # add on dictionary
         
         this_user = self
         lookup.add_and_search(this_user, message, lookup_table)     # find friend

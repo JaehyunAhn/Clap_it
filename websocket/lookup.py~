@@ -19,9 +19,6 @@
         9) gy_y  (n): y coordinate occurred time
         10)gy_z  (n): z
 
-<Lookup Table>
-    From client
-       +11) sender_ip : server got ip address from the sender
 """
 
 def add_and_search(this_user, message, lookup_table):
@@ -45,33 +42,32 @@ def add_and_search(this_user, message, lookup_table):
         passed_msg_t    = (message['send_t'] - client_log['send_t'])/1000
         passed_on_t     = (message['on_t'] - client_log['on_t'])/1000
         # GPS diff: 0.001 diff = 100 meters far
-        lart_diff       = abs((message['lart_gps'] - client_log['lart_gps'])*1000)
-        lont_diff       = abs((message['lont_gps'] - client_log['lont_gps'])*1000)
+        lart_diff       = abs((int(message['lart_gps']) - 
+                                int(client_log['lart_gps']))*1000)
+        lont_diff       = abs((int(message['lont_gps']) - 
+                                int(client_log['lont_gps']))*1000)
 
         if passed_msg_t > 7:                    # passed 8 seconds
             lookup_table.remove(client_log)     # delete log
             continue
 
-        if (lart_diff < 2) and (lont_diff < 2): # within 200 square meters
+        if (lart_diff < 1) and (lont_diff < 1): # within 100m^2 square
             matching_possibility += 30
-        else if (lart_diff < 10) and (lont_diff < 10):  # within 1 km squares
+        elif (lart_diff < 2) and (lont_diff < 2):  # within 200m^2 squares
             matching_possibility += 10
-        else if (lart_diff < 100) and (lont_diff < 100):# within 10km squares
+        elif (lart_diff < 10) and (lont_diff < 10):# within 1km squares
             matching_possibility -= 20
         else:
-            matching_possibility -= 50
+            matching_possibility -= 50               # more than 1 km
         
         if passed_msg_t < 2:                    # excged within 2 seconds
             matching_possibility += 20
-        else if passed_msg_t < 3:
+        elif passed_msg_t < 3:
             matching_possibility += 10
-        else if passed_msg_t < 4:
-            matching_possibility -= 30
+        elif passed_msg_t < 4:                  # both of clients stay still
+            matching_possibility -= 60
         else:
-            matching_possibility -= 50
-
-        if message['sender_ip'] != client_log['sender_ip']:
-            matching_possibility -= 5
+            matching_possibility -= 70
 
         if message['cell_id'] != client_log['cell_id']:
             matching_possibility -= 5
@@ -79,6 +75,15 @@ def add_and_search(this_user, message, lookup_table):
         if message['net_id'] != client_log['net_id']:
             matching_possibility -= 5
 
-        print matching_possibility
+        if matching_possibility > 50:
+            if message['send_id'] == client_log['send_id']:
+                pass
+            else:
+                match_result = client_log
+                this_user.write_message(match_result)
+
+        print matching_possibility 
+        print match_result['send_id']
+    print '--------------------'
     lookup_table.append(message)                    # Add sender's message
     this_user.write_message(match_result)

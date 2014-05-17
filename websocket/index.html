@@ -71,12 +71,14 @@ function sendMessage() {
 		send_id	:	document.getElementById("username").value,
 		send_t	:	abs, //datetime,
 		lart_gps:	37.551336,
-		lont_gps:	126.940753,
+		lont_gps:	Number(document.getElementById("distance").value),
+		//lont_gps:	distance,//126.940753,
 		cell_id	:	"Cellular ID",
 		net_id	:	"Network ID",
 		msg		:	document.getElementById("message").value,
 		on_t	:	abs, // same with datetime
-		acc_t	:	"Accelator time",
+		//acc_t	:	"Accelator time",
+		acc_t	:	Number(document.getElementById("acc-t").value),
 		gy_x	:	"Gyro x angle",
 		gy_y	:	"Gyro y angle",
 		gy_z	:	"Gyro z angle"
@@ -103,7 +105,9 @@ window.onload = function() {
 <body>
 <div id="chat" style="width: 100%; height: 25em; overflow: scroll; font-family: Arial"></div>
 <div id="input_area">
-	<input id="username" type="text" placeholder="Your username" style="display: block; width: 200px"></input>
+	<input id="username" type="text" placeholder="Your username" style="display: block; width: 70px"></input>
+	<input id="distance" type="text" placeholder="far-from" style="display: block; width: 70px"></input>
+	<input id="acc-t" type="text" placeholder="acc-time" style="display: block; width: 70px"></input>
 	<textarea id="message" placeholder="Your message" style="display: block; width: 400px"></textarea>
 	<button onclick="sendMessage()" style="display: block">Send</button>
 </div>
