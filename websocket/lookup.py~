@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # lookup.py file
 
+import math
+
 """ message encoded with Json, variable which are,
 <JSON>
     From Android device
@@ -36,54 +38,89 @@ def add_and_search(this_user, message, lookup_table):
                         'gy_z'      :''
                         }
     
-    for client_log in lookup_table[:]:          # Search table with message
-        matching_possibility = 100              # Possibility
+    for client_log in lookup_table[:]:# Search table with message
         # Second diff: miliseconds
-        passed_msg_t    = (message['send_t'] - client_log['send_t'])/1000
-        passed_on_t     = (message['on_t'] - client_log['on_t'])/1000
-        # GPS diff: 0.001 diff = 100 meters far
-        lart_diff       = abs((int(message['lart_gps']) - 
-                                int(client_log['lart_gps']))*1000)
-        lont_diff       = abs((int(message['lont_gps']) - 
-                                int(client_log['lont_gps']))*1000)
+        between_msg_t = (message['send_t'] - 
+                        client_log['send_t'])/1000
+        between_on_t = (message['on_t'] - 
+                        client_log['on_t'])/1000
+        on_to_s_msg = (message['send_t'] -
+                        message['on_t'])/1000
+        on_to_s_log = (client_log['send_t'] -
+                        client_log['on_t'])/1000
+        # GPS diff: 0.001 diff = 100 meters far, 1 = 100m
+        lart_diff = abs((int(message['lart_gps']) - 
+                        int(client_log['lart_gps']))*1000)
+        lont_diff = abs((int(message['lont_gps']) - 
+                        int(client_log['lont_gps']))*1000)
 
-        if passed_msg_t > 7:                    # passed 8 seconds
+        if between_msg_t > 7:                   # passed 8 seconds
             lookup_table.remove(client_log)     # delete log
             continue
 
-        if (lart_diff < 1) and (lont_diff < 1): # within 100m^2 square
-            matching_possibility += 30
-        elif (lart_diff < 2) and (lont_diff < 2):  # within 200m^2 squares
-            matching_possibility += 10
-        elif (lart_diff < 10) and (lont_diff < 10):# within 1km squares
-            matching_possibility -= 20
-        else:
-            matching_possibility -= 50               # more than 1 km
+        # gps trustworthy: based on calcuating time
+        trustworthy = (gps_trustworthy(on_to_s_msg) + 
+                                    gps_trustworthy(on_to_s_log))
+        # initial possibility: based on distance
+        possibility = inital_possibility( trustworthy, 
+                                            lart_diff, lont_diff)
         
-        if passed_msg_t < 2:                    # excged within 2 seconds
-            matching_possibility += 20
-        elif passed_msg_t < 3:
-            matching_possibility += 10
-        elif passed_msg_t < 4:                  # both of clients stay still
-            matching_possibility -= 60
+        if message['acc_t'] != 0 and client_log['acc_t'] != 0:
+            pass                # both acc
+        elif message['acc_t'] == 0 and client_log['acc_t'] == 0:
+            possibility -= 10   # both stay still
         else:
-            matching_possibility -= 70
+            possibility -= 5    # one acc
 
         if message['cell_id'] != client_log['cell_id']:
-            matching_possibility -= 5
+            possibility -= 5    # cellular id
+        if message['net_id']  != client_log['net_id'] :
+            possibility -= 7    # network id
+        
+        # possibility : arrived time
+        possibility = possibility - 5 * between_msg_t
 
-        if message['net_id'] != client_log['net_id']:
-            matching_possibility -= 5
-
-        if matching_possibility > 50:
+        if possibility > 50:
             if message['send_id'] == client_log['send_id']:
                 pass
             else:
                 match_result = client_log
                 this_user.write_message(match_result)
 
-        print matching_possibility 
+        print possibility 
         print match_result['send_id']
     print '--------------------'
-    lookup_table.append(message)                    # Add sender's message
+    lookup_table.append(message)        # Add sender's message
     this_user.write_message(match_result)
+
+def gps_trustworthy(time):
+    if time >= 4:
+        return 10
+    if time >= 3:
+        return 10
+    if time >= 2:
+        return 8
+    if time >= 1:
+        return 6
+    return 2
+
+def inital_possibility( trust_val, lart, lont ):
+    dist = math.sqrt(pow(lart,2)+pow(lont,2))
+    possibility = 0
+    if dist <= 1.5:
+        possibility = 100
+    elif dist <= 3.0:
+        possibility = 90
+    elif dist <= 10.0:
+        possibility = 70
+    else:
+        possibility = 50
+
+    if trust_val == 20:
+        return possibility - 20
+    elif trust_val >= 16:
+        return possibility - 30
+    elif trust_val >= 12:
+        return possibility
+    else:
+        return possibility - 10

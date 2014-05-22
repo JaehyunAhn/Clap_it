@@ -46,7 +46,7 @@ def add_and_search(this_user, message, lookup_table):
                         client_log['on_t'])/1000
         on_to_s_msg = (message['send_t'] -
                         message['on_t'])/1000
-        on_to_s_log = (client_log['send_t'] -
+        on_to_s_log = (clinet_log['send_t'] -
                         client_log['on_t'])/1000
         # GPS diff: 0.001 diff = 100 meters far, 1 = 100m
         lart_diff = abs((int(message['lart_gps']) - 
@@ -58,27 +58,23 @@ def add_and_search(this_user, message, lookup_table):
             lookup_table.remove(client_log)     # delete log
             continue
 
-        # gps trustworthy: based on calcuating time
-        trustworthy = (gps_trustworthy(on_to_s_msg) + 
-                                    gps_trustworthy(on_to_s_log))
-        # initial possibility: based on distance
+        #message['data'], client_log['data'] = possibility
+        trustworthy = gps_trustworthy(on_to_s_msg) + 
+                        gps_trustworthy(on_to_s_log)
         possibility = inital_possibility( trustworthy, 
                                             lart_diff, lont_diff)
         
-        if message['acc_t'] != 0 and client_log['acc_t'] != 0:
-            pass                # both acc
-        elif message['acc_t'] == 0 and client_log['acc_t'] == 0:
-            possibility -= 10   # both stay still
+        if message['acc_t'] != 0 && client_log['acc_t'] != 0:
+            pass
+        elif message['acc_t'] == 0 && client_log['acc_t'] == 0:
+            possibility -= 20
         else:
-            possibility -= 5    # one acc
+            possibility -= 10
 
         if message['cell_id'] != client_log['cell_id']:
-            possibility -= 5    # cellular id
+            possibility -= 5
         if message['net_id']  != client_log['net_id'] :
-            possibility -= 7    # network id
-        
-        # possibility : arrived time
-        possibility = possibility - 5 * between_msg_t
+            possibility -= 7
 
         if possibility > 50:
             if message['send_id'] == client_log['send_id']:
