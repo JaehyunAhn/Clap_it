@@ -29,7 +29,7 @@ function createChatEntry(var1, var2, var3) {
 }
 
 function openWS(messageContainer) {
-	ws = new WebSocket("ws://localhost/chat");
+	ws = new WebSocket("ws://10.0.9.2/chat");
 	ws.onmessage = function(e) {
 		var data = JSON.parse(e.data);
 		messageContainer.appendChild( // send messge to chat.py
@@ -71,14 +71,14 @@ function sendMessage() {
 		send_id	:	document.getElementById("username").value,
 		send_t	:	abs, //datetime,
 		lart_gps:	37.551336,
-		lont_gps:	document.getElementById("distance").value,
+		lont_gps:	Number(document.getElementById("distance").value),
 		//lont_gps:	distance,//126.940753,
 		cell_id	:	"Cellular ID",
 		net_id	:	"Network ID",
 		msg		:	document.getElementById("message").value,
 		on_t	:	abs, // same with datetime
 		//acc_t	:	"Accelator time",
-		acc_t	:	document.getElementById("acc-t").value,
+		acc_t	:	Number(document.getElementById("acc-t").value),
 		gy_x	:	"Gyro x angle",
 		gy_y	:	"Gyro y angle",
 		gy_z	:	"Gyro z angle"

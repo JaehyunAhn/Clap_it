@@ -29,17 +29,17 @@ function createChatEntry(var1, var2, var3) {
 }
 
 function openWS(messageContainer) {
-	ws = new WebSocket("ws://localhost/chat");
+	ws = new WebSocket("ws://10.0.9.2/chat");
 	ws.onmessage = function(e) {
 		var data = JSON.parse(e.data);
 		messageContainer.appendChild( // send messge to chat.py
 				createChatEntry(data.send_id,
+								data.msg,
 								data.send_t,
 								data.lart_gps,
 								data.lont_gps,
 								data.cell_id,
 								data.network_id,
-								data.msg,
 								data.on_t, 
 								data.acc_t,
 								data.gy_x,
