@@ -29,7 +29,7 @@ function createChatEntry(var1, var2, var3) {
 }
 
 function openWS(messageContainer) {
-	ws = new WebSocket("ws://10.0.9.2/chat");
+	ws = new WebSocket("ws://192.168.0.23/chat");
 	ws.onmessage = function(e) {
 		var data = JSON.parse(e.data);
 		messageContainer.appendChild( // send messge to chat.py
@@ -86,6 +86,7 @@ function sendMessage() {
 
 	if(data.send_id && data.msg && data.send_t) {
 		ws.send(JSON.stringify(data));
+		console.log(JSON.stringfy(data));
 	}
 }
 

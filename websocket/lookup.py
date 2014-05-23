@@ -66,11 +66,11 @@ def add_and_search(this_user, message, lookup_table):
                                             lart_diff, lont_diff)
         
         if message['acc_t'] != 0 and client_log['acc_t'] != 0:
-            pass                # both acc
+            pass                # both gear acted
         elif message['acc_t'] == 0 and client_log['acc_t'] == 0:
-            possibility -= 10   # both stay still
+            possibility -= 10   # both gear stayed still
         else:
-            possibility -= 5    # one acc
+            possibility -= 5    # one gear acted
 
         if message['cell_id'] != client_log['cell_id']:
             possibility -= 5    # cellular id
@@ -79,19 +79,20 @@ def add_and_search(this_user, message, lookup_table):
         
         # possibility : arrived time
         possibility = possibility - 5 * between_msg_t
-
         if possibility > 50:
             if message['send_id'] == client_log['send_id']:
                 pass
             else:
                 match_result = client_log
-                this_user.write_message(match_result)
-
+                this_user.write_message(match_result) # Find item
+        else:
+            this_user.write_message(match_result) # Resend Request
         print possibility 
         print match_result['send_id']
-    print '--------------------'
-    lookup_table.append(message)        # Add sender's message
-    this_user.write_message(match_result)
+        print message
+    print ('--------------------')
+    print(len(lookup_table))                # lookup table length
+    lookup_table.append(message)            # Add sender's message
 
 def gps_trustworthy(time):
     if time >= 4:
