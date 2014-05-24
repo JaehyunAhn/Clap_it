@@ -22,11 +22,15 @@ import math
         9) gy_y  (n): y coordinate occurred time
         10)gy_z  (n): z
 
+    Data: if (possibility over threshold):
+            excg contacts
 """
 
 def add_and_search(this_user, message, lookup_table):
     lookup_count = 0
-    refresh = False
+    threshold = 50
+    refresh_mylog = False
+    
     match_result = {    'send_id' :'admin',
                         'send_t'    :'',
                         'lart_gps'  :'',
@@ -69,35 +73,37 @@ def add_and_search(this_user, message, lookup_table):
                                             lart_diff, lont_diff)
         
         if message['acc_t'] != 0 and client_log['acc_t'] != 0:
-            pass                # both gear acted
+            pass                # if both gear acted
         elif message['acc_t'] == 0 and client_log['acc_t'] == 0:
-            possibility -= 10   # both gear stayed still
+            possibility -= 20   # if both gear's are stayed still
         else:
-            possibility -= 5    # one gear acted
+            possibility -= 10   # if only one gear acted
 
         if message['net_id'][0:10] is client_log['net_id'][0:10] :
             possibility += 7    # if network ip is internal then +
         
         # possibility : arrived time
-        possibility = possibility - 5 * between_msg_t
-        if possibility > 45:
+        possibility = possibility - 3.5 * between_msg_t
+        if possibility > threshold:
             if message['send_id'] == client_log['send_id']:
-                client_log = message # refresh duplicated log
-                refresh = True
+                client_log = message    # refresh duplicated log
+                refresh_mylog = True
             else:
                 match_result = client_log
                 this_user.write_message(match_result) # Find item
-                lookup_count += 1         # increase lookup count
-        print possibility 
+                lookup_count += 1       # increase lookup count
+        print "Possibility:" + str(possibility) 
         print match_result['send_id']
     print ('--------------------')
-    print(len(lookup_table))                # lookup table length
+    print "Table length: " + str(len(lookup_table)) 
+    # lookup table length
     if lookup_count is 0:
-        this_user.write_message(match_result) # Resend Request
-    if refresh is True:
+        this_user.write_message(match_result)   # Resend Request
+    if refresh_mylog is True:
         pass
     else:
         lookup_table.append(message)    # Add sender's message
+    print "my msg: " + str(message)
 
 def gps_trustworthy(time):
     # Get gps trustworthy, this belongs to on time - send time
@@ -105,27 +111,29 @@ def gps_trustworthy(time):
     if time >= 4:
         return 7
     if time >= 3:
-        return 10
+        return 9
     if time >= 2:
         return 9
     if time >= 1:
-        return 6
+        return 7
     return 2
 
 def inital_possibility( trust_val, lart, lont ):
     # Get initial exchange rationaility, it depends on
-    #   GPS difference between points.
+    #   GPS difference between points. (float) 1.0 == 100 m
     dist = math.sqrt(pow(lart,2)+pow(lont,2))
     print "distance:" + str(dist)
     possibility = 0
-    if dist <= 1.5:
+    if   dist <= 0.2:       # 20 m
         possibility = 100
-    elif dist <= 3.0:
-        possibility = 90
-    elif dist <= 10.0:
-        possibility = 70
+    elif dist <= 0.5:       # 50 m
+        possibility = 75
+    elif dist <= 1.0:       # 100 m
+        possibility = 60
+    elif dist <= 3.0:       # 300 m
+        possibility = 55
     else:
-        possibility = 50
+        possibility = 40    # over
 
     # Use GPS trustworthy to get reliable rational data.
     if trust_val == 20:
