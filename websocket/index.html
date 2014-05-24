@@ -29,7 +29,7 @@ function createChatEntry(var1, var2, var3) {
 }
 
 function openWS(messageContainer) {
-	ws = new WebSocket("ws://192.168.0.23/chat");
+	ws = new WebSocket("ws://192.168.0.6/chat");
 	ws.onmessage = function(e) {
 		var data = JSON.parse(e.data);
 		messageContainer.appendChild( // send messge to chat.py
@@ -70,7 +70,7 @@ function sendMessage() {
 		// cooking message 
 		send_id	:	document.getElementById("username").value,
 		send_t	:	abs, //datetime,
-		lart_gps:	37.551336,
+		lart_gps:	3.14,
 		lont_gps:	Number(document.getElementById("distance").value),
 		//lont_gps:	distance,//126.940753,
 		cell_id	:	"Cellular ID",
