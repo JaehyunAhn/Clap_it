@@ -75,7 +75,7 @@ def add_and_search(this_user, message, lookup_table):
         if message['acc_t'] != 0 and client_log['acc_t'] != 0:
             pass                # if both gear acted
         elif message['acc_t'] == 0 and client_log['acc_t'] == 0:
-            possibility -= 20   # if both gear's are stayed still
+            possibility -= 35   # if both gear's are stayed still
         else:
             possibility -= 10   # if only one gear acted
 
@@ -85,8 +85,13 @@ def add_and_search(this_user, message, lookup_table):
         # possibility : arrived time
         possibility = possibility - 3.5 * between_msg_t
         if possibility > threshold:
+            # Refresh log with new message
             if message['send_id'] == client_log['send_id']:
+                acc_log = 0
+                if client_log['acc_t'] is 0:
+                    acc_log = client_log['acc_t']
                 client_log = message    # refresh duplicated log
+                client_log['acc_t'] = acc_log
                 refresh_mylog = True
             else:
                 match_result = client_log

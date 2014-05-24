@@ -85,8 +85,13 @@ def add_and_search(this_user, message, lookup_table):
         # possibility : arrived time
         possibility = possibility - 3.5 * between_msg_t
         if possibility > threshold:
+            # Refresh log with new message
             if message['send_id'] == client_log['send_id']:
+                acc_log = 0
+                if client_log['acc_t'] is not 0:
+                    acc_log = client_log['acc_t']
                 client_log = message    # refresh duplicated log
+                client_log['acc_t'] = acc_log
                 refresh_mylog = True
             else:
                 match_result = client_log
