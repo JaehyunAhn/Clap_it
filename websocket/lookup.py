@@ -28,10 +28,10 @@ import math
 
 def add_and_search(this_user, message, lookup_table):
     lookup_count = 0
-    threshold = 50
+    threshold = 40
     refresh_mylog = False
     
-    match_result = {    'send_id' :'admin',
+    match_result = {    'send_id'   :'',
                         'send_t'    :'',
                         'lart_gps'  :'',
                         'lont_gps'  :'',
@@ -84,23 +84,23 @@ def add_and_search(this_user, message, lookup_table):
         
         # possibility : arrived time
         possibility = possibility - 3.5 * between_msg_t
-        if possibility > threshold:
+        if possibility > trustworthy:
             # Refresh log with new message
-            if message['send_id'] == client_log['send_id']:
-                acc_log = 0
-                if client_log['acc_t'] is not 0:
-                    acc_log = client_log['acc_t']
+            if message['msg'] == client_log['msg']:
+                temp = 0.0
+                temp = client_log['acc_t']
                 client_log = message    # refresh duplicated log
-                client_log['acc_t'] = acc_log
+                if client_log['acc_t'] > 0.0:
+                    client_log['acc_t'] = temp
+                    message['acc_t'] = temp
                 refresh_mylog = True
             else:
                 match_result = client_log
-                this_user.write_message(match_result) # Find item
                 lookup_count += 1       # increase lookup count
-        print "Possibility:" + str(possibility) 
-        print match_result['send_id']
+                this_user.write_message(match_result) # Find item
+                print "I find you" + str(match_result['msg'])
     print ('--------------------')
-    print "Table length: " + str(len(lookup_table)) 
+    print "Table length: " + str(len(lookup_table))
     # lookup table length
     if lookup_count is 0:
         this_user.write_message(match_result)   # Resend Request
@@ -108,7 +108,7 @@ def add_and_search(this_user, message, lookup_table):
         pass
     else:
         lookup_table.append(message)    # Add sender's message
-    print "my msg: " + str(message)
+    print "I send this msg: " + str(message['msg'])
 
 def gps_trustworthy(time):
     # Get gps trustworthy, this belongs to on time - send time
@@ -116,7 +116,7 @@ def gps_trustworthy(time):
     if time >= 4:
         return 7
     if time >= 3:
-        return 9
+        return 8
     if time >= 2:
         return 9
     if time >= 1:
@@ -129,7 +129,9 @@ def inital_possibility( trust_val, lart, lont ):
     dist = math.sqrt(pow(lart,2)+pow(lont,2))
     print "distance:" + str(dist)
     possibility = 0
-    if   dist <= 0.2:       # 20 m
+    if   dist <= 0.1:       # 10 m
+        possibility = 140 
+    elif dist <= 0.2:       # 20 m
         possibility = 100
     elif dist <= 0.5:       # 50 m
         possibility = 75
@@ -140,12 +142,19 @@ def inital_possibility( trust_val, lart, lont ):
     else:
         possibility = 40    # over
 
+    return possibility
+
     # Use GPS trustworthy to get reliable rational data.
+    print "Trust val: " + str(trust_val)
     if trust_val == 20:
         return possibility - 20
     elif trust_val >= 16:
-        return possibility - 30
-    elif trust_val >= 12:
         return possibility
-    else:
+    elif trust_val >= 11:
         return possibility - 10
+    elif trust_val >= 9:
+        return possibility - 20
+    elif trust_val >= 5:
+        return possibility - 26
+    else:
+        return possibility - 25

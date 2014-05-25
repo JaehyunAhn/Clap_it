@@ -23,8 +23,8 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         message = eval(message)             # converge unicode to dictionary
-        print(message)
-        
+        print "acc time is " + str(message['acc_t'])
+
         this_user = self
         lookup.add_and_search(this_user, message, lookup_table)     # find friend
         
