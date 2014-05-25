@@ -61,7 +61,7 @@ def add_and_search(this_user, message, lookup_table):
         lont_diff = abs((float(message['lont_gps']) - 
                         float(client_log['lont_gps']))*1000)
 
-        if between_msg_t > 7:                   # passed 8 seconds
+        if between_msg_t > 6:                   # passed 8 seconds
             lookup_table.remove(client_log)     # delete log
             continue
 
@@ -77,13 +77,13 @@ def add_and_search(this_user, message, lookup_table):
         elif message['acc_t'] == 0 and client_log['acc_t'] == 0:
             possibility -= 35   # if both gear's are stayed still
         else:
-            possibility -= 10   # if only one gear acted
+            possibility -= 15   # if only one gear acted
 
         if message['net_id'][0:10] is client_log['net_id'][0:10] :
             possibility += 7    # if network ip is internal then +
         
         # possibility : arrived time
-        possibility = possibility - 3.5 * between_msg_t
+        possibility = possibility - 5.5 * between_msg_t
         if possibility > trustworthy:
             # Refresh log with new message
             if message['msg'] == client_log['msg']:
@@ -130,7 +130,7 @@ def inital_possibility( trust_val, lart, lont ):
     print "distance:" + str(dist)
     possibility = 0
     if   dist <= 0.1:       # 10 m
-        possibility = 120 
+        possibility = 100 
     elif dist <= 0.2:       # 20 m
         possibility = 90
     elif dist <= 0.5:       # 50 m
