@@ -142,10 +142,10 @@ def inital_possibility( trust_val, lart, lont ):
     else:
         possibility = 40    # over
 
-    return possibility
-
     # Use GPS trustworthy to get reliable rational data.
     print "Trust val: " + str(trust_val)
+    print "Possibility: " + str(possibility)
+
     if trust_val == 20:
         return possibility - 20
     elif trust_val >= 16:

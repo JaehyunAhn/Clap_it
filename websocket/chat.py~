@@ -23,7 +23,8 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         message = eval(message)             # converge unicode to dictionary
-        
+        print "acc time is " + str(message['acc_t'])
+
         this_user = self
         lookup.add_and_search(this_user, message, lookup_table)     # find friend
         
@@ -32,6 +33,20 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
     
     def on_close(self):
         print("clinet gone")
+        match_result = {'send_id' :'admin',
+                        'send_t'    :'',
+                        'lart_gps'  :'',
+                        'lont_gps'  :'',
+                        'cell_id'   :'',
+                        'net_id'    :'',
+                        'msg'       :'failed',
+                        'on_t'      :'',
+                        'acc_t'     :'',
+                        'gy_x'      :'',
+                        'gy_y'      :'',
+                        'gy_z'      :''
+                        }
+        self.write_message(match_result)
         clients.remove(self)
 
 

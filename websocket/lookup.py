@@ -130,9 +130,9 @@ def inital_possibility( trust_val, lart, lont ):
     print "distance:" + str(dist)
     possibility = 0
     if   dist <= 0.1:       # 10 m
-        possibility = 140 
+        possibility = 120 
     elif dist <= 0.2:       # 20 m
-        possibility = 100
+        possibility = 90
     elif dist <= 0.5:       # 50 m
         possibility = 75
     elif dist <= 1.0:       # 100 m
@@ -142,10 +142,10 @@ def inital_possibility( trust_val, lart, lont ):
     else:
         possibility = 40    # over
 
-    return possibility
-
     # Use GPS trustworthy to get reliable rational data.
     print "Trust val: " + str(trust_val)
+    print "Possibility: " + str(possibility)
+
     if trust_val == 20:
         return possibility - 20
     elif trust_val >= 16:
