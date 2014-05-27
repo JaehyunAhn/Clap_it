@@ -61,7 +61,7 @@ def add_and_search(this_user, message, lookup_table):
         lont_diff = abs((float(message['lont_gps']) - 
                         float(client_log['lont_gps']))*1000)
 
-        if between_msg_t > 6:                   # passed 8 seconds
+        if between_msg_t > 7:                   # passed 8 seconds
             lookup_table.remove(client_log)     # delete log
             continue
 

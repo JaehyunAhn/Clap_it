@@ -83,7 +83,7 @@ def add_and_search(this_user, message, lookup_table):
             possibility += 7    # if network ip is internal then +
         
         # possibility : arrived time
-        possibility = possibility - 3.5 * between_msg_t
+        possibility = possibility - 5.5 * between_msg_t
         if possibility > trustworthy:
             # Refresh log with new message
             if message['msg'] == client_log['msg']:
